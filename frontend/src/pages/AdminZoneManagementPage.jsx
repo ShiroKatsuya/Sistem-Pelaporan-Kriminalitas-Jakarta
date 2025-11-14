@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapContainer, TileLayer, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer } from 'react-leaflet';
 import { EditControl } from 'react-leaflet-draw';
 import L from 'leaflet';
 import { zonesAPI } from '../services/api';
@@ -36,11 +36,7 @@ const AdminZoneManagementPage = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  useEffect(() => {
-    loadZones();
-  }, []);
-
-  const loadZones = async () => {
+  const loadZones = useCallback(async () => {
     try {
       const response = await zonesAPI.getAll();
       setZones(response.data);
@@ -53,7 +49,11 @@ const AdminZoneManagementPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [navigate]);
+
+  useEffect(() => {
+    loadZones();
+  }, [loadZones]);
 
   const handleCreate = () => {
     setEditingZone(null);

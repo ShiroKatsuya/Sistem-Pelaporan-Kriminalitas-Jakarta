@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { adminAPI } from '../services/api';
 import { removeToken } from '../utils/auth';
@@ -34,11 +34,7 @@ const AdminReportManagementPage = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  useEffect(() => {
-    loadReports();
-  }, [filters]);
-
-  const loadReports = async () => {
+  const loadReports = useCallback(async () => {
     try {
       setLoading(true);
       const response = await adminAPI.getReports(filters);
@@ -52,7 +48,11 @@ const AdminReportManagementPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters, navigate]);
+
+  useEffect(() => {
+    loadReports();
+  }, [loadReports]);
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
@@ -132,12 +132,12 @@ const AdminReportManagementPage = () => {
             >
               Dashboard
             </button>
-            <button
+            {/* <button
               onClick={() => navigate('/admin/zones')}
               className="px-4 py-2 bg-blue-700 rounded hover:bg-blue-800"
             >
               Kelola Zona
-            </button>
+            </button> */}
             <button
               onClick={() => {
                 removeToken();

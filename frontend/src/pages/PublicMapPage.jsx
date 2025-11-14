@@ -1,10 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Map from '../components/Map';
 import HeatmapLayer from '../components/HeatmapLayer';
 import ZoneLayer from '../components/ZoneLayer';
 import { reportsAPI, zonesAPI } from '../services/api';
-import { format } from 'date-fns';
-import { id } from 'date-fns/locale';
 
 const JENIS_KEJAHATAN = [
   { value: '', label: 'Semua Jenis' },
@@ -26,11 +24,7 @@ const PublicMapPage = () => {
     endDate: '',
   });
 
-  useEffect(() => {
-    loadData();
-  }, [filters]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -50,7 +44,11 @@ const PublicMapPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;

@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 require('dotenv').config();
 
-const { testConnection } = require('./config/database');
+const { testConnection, pool } = require('./config/database');
 const reportsRoutes = require('./routes/reports');
 const zonesRoutes = require('./routes/zones');
 const adminRoutes = require('./routes/admin');
@@ -48,11 +48,88 @@ app.use((err, req, res, next) => {
   });
 });
 
+// Initialize database schema if tables don't exist
+const initializeDatabase = async () => {
+  try {
+    // Check if reports table exists
+    const tableCheck = await pool.query(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = 'reports'
+      )
+    `);
+    
+    if (!tableCheck.rows[0].exists) {
+      console.log('Database tables not found. Initializing schema...');
+      const schemaPath = path.join(__dirname, '../database/schema.sql');
+      const schema = fs.readFileSync(schemaPath, 'utf8');
+      
+      // Split SQL statements while handling $$ delimiters in functions
+      const statements = [];
+      let currentStatement = '';
+      let inDollarQuote = false;
+      let dollarTag = '';
+      
+      const lines = schema.split('\n');
+      
+      for (const line of lines) {
+        // Skip comment-only lines
+        if (line.trim().startsWith('--') && !inDollarQuote) {
+          continue;
+        }
+        
+        currentStatement += line + '\n';
+        
+        // Check for dollar quote start/end
+        const dollarQuoteMatch = line.match(/\$([^$]*)\$/g);
+        if (dollarQuoteMatch) {
+          for (const match of dollarQuoteMatch) {
+            if (!inDollarQuote) {
+              inDollarQuote = true;
+              dollarTag = match;
+            } else if (match === dollarTag) {
+              inDollarQuote = false;
+              dollarTag = '';
+            }
+          }
+        }
+        
+        // If we're not in a dollar quote and line ends with semicolon, it's a complete statement
+        if (!inDollarQuote && line.trim().endsWith(';')) {
+          const trimmed = currentStatement.trim();
+          if (trimmed && trimmed !== ';') {
+            statements.push(trimmed);
+          }
+          currentStatement = '';
+        }
+      }
+      
+      // Execute each statement
+      for (const statement of statements) {
+        if (statement.trim()) {
+          await pool.query(statement);
+        }
+      }
+      
+      console.log('Database schema initialized successfully!');
+    } else {
+      console.log('Database tables already exist.');
+    }
+  } catch (error) {
+    console.error('Error initializing database:', error.message);
+    throw error;
+  }
+};
+
 // Start server
 const startServer = async () => {
   try {
     // Test database connection
     await testConnection();
+    
+    // Initialize database schema if needed
+    await initializeDatabase();
 
     // Start server
     app.listen(PORT, () => {

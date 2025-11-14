@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useMap } from 'react-leaflet';
 import L from 'leaflet';
 
@@ -59,7 +59,8 @@ const calculateIntensity = (reports, clusterRadius = 0.5) => {
         const gridKey = `${latGrid + i},${lngGrid + j}`;
         const cellReports = grid.get(gridKey);
         if (cellReports) {
-          cellReports.forEach((otherReport) => {
+          for (let k = 0; k < cellReports.length; k++) {
+            const otherReport = cellReports[k];
             const distance = calculateDistance(
               lat,
               lng,
@@ -67,9 +68,9 @@ const calculateIntensity = (reports, clusterRadius = 0.5) => {
               otherReport.longitude
             );
             if (distance <= clusterRadius) {
-              nearbyCount++;
+              nearbyCount += 1;
             }
-          });
+          }
         }
       }
     }

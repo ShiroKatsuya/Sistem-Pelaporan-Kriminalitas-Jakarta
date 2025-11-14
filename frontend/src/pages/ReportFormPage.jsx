@@ -56,7 +56,7 @@ const JENIS_KEJAHATAN = [
 
 const ReportFormPage = () => {
   const navigate = useNavigate();
-  const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm();
+  const { register, handleSubmit, formState: { errors }, setValue } = useForm();
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
