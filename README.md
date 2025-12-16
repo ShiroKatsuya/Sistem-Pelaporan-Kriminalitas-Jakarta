@@ -1,6 +1,10 @@
 # Sistem Pelaporan dan Pemetaan Visual Wilayah Rawan Kriminalitas di DKI Jakarta
 
-Aplikasi web untuk pelaporan dan pemetaan visual wilayah rawan kriminalitas di DKI Jakarta berbasis web.
+Developed a web-based crime reporting and visual mapping system for DKI Jakarta. Features an interactive heatmap using Leaflet and PostGIS, anonymous report submission, and a comprehensive admin dashboard for data management and analytics.
+
+Interactive crime heatmap and manual zone mapping
+Anonymous public reporting with location picking
+Admin dashboard for analytics and report management
 
 ## Tech Stack
 
